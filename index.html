@@ -1,0 +1,638 @@
+
+ <!DOCTYPE html>
+ <html lang="en" class="h-full bg-slate-950 text-slate-100">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Unikgram - Social & Chat</title>
+   <!-- Tailwind CSS CDN -->
+   <script src="https://cdn.tailwindcss.com"></script>
+   <script>
+       tailwind.config = {
+           darkMode: 'class',
+           theme: {
+               extend: {
+                   colors: {
+                       brand: {
+                           green: '#10b981', // Emerald 500
+                           pink: '#ec4899', // Pink 500
+                           dark: '#090d16',
+                           card: '#111827',
+                           border: '#1f2937'
+                       }
+                   },
+                   fontFamily: {
+                       sans: ['Inter', 'sans-serif']
+                   }
+               }
+           }
+       }
+   </script>
+   <!-- FontAwesome Icons -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <!-- Google Fonts -->
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   <style>
+       /* Custom scrollbars */
+       ::-webkit-scrollbar {
+           width: 6px;
+           height: 6px;
+       }
+       ::-webkit-scrollbar-track {
+           background: #0f172a;
+       }
+       ::-webkit-scrollbar-thumb {
+           background: #334155;
+           border-radius: 9999px;
+       }
+       ::-webkit-scrollbar-thumb:hover {
+           background: #475569;
+       }
+       .story-ring {
+           background: linear-gradient(45deg, #10b981, #ec4899, #3b82f6);
+       }
+   </style>
+ </head>
+ <body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100 selection:bg-pink-500 selection:text-white">
+   <!-- Top Navigation Bar (Mobile / Tablet header) -->
+   <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 md:hidden">
+       <div class="flex items-center space-x-3">
+           <!-- App Logo SVG -->
+           <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-pink-500 to-emerald-400 p-[2px] flex items-center justify-center shadow-lg shadow-emerald-500/10">
+               <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center relative">
+                   <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
+                   <span class="absolute -bottom-1 -right-1 text-[10px] font-extrabold text-pink-400 bg-slate-950 px-0.5 rounded">U</span>
+               </div>
+           </div>
+           <span class="text-xl font-bold bg-gradient-to-r from-emerald-400 via-pink-400 to-emerald-300 bg-clip-text text-transparent tracking-tight">Unikgram</span>
+       </div>
+       <div class="flex items-center space-x-3">
+           <button onclick="openCreateModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 text-slate-200 hover:text-emerald-400 hover:bg-slate-700 transition">
+               <i class="fa-solid fa-plus text-base"></i>
+           </button>
+           <button onclick="switchTab('messages')" class="relative w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 text-slate-200 hover:text-pink-400 hover:bg-slate-700 transition">
+               <i class="fa-regular fa-paper-plane text-base"></i>
+               <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-pink-500 rounded-full ring-2 ring-slate-900"></span>
+           </button>
+       </div>
+   </header>
+   <!-- Main Container -->
+   <div class="flex-1 flex overflow-hidden max-w-7xl w-full mx-auto">
+       <!-- Sidebar Navigation (Desktop / Tablet) -->
+       <aside class="hidden md:flex flex-col justify-between w-64 lg:w-72 p-4 border-r border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+           <div class="space-y-6">
+               <!-- App Brand Header -->
+               <div class="flex items-center space-x-3 px-3 py-2">
+                   <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-pink-500 to-emerald-400 p-[2px] flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                       <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center relative">
+                           <i class="fa-solid fa-camera text-emerald-400 text-base"></i>
+                           <span class="absolute -bottom-1 -right-1 text-xs font-black text-pink-400 bg-slate-950 px-1 rounded">U</span>
+                       </div>
+                   </div>
+                   <div>
+                       <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 via-pink-400 to-emerald-300 bg-clip-text text-transparent">Unikgram</h1>
+                       <p class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Social & Messaging</p>
+                   </div>
+               </div>
+               <!-- Navigation Links -->
+               <nav class="space-y-1">
+                   <button onclick="switchTab('feed')" id="nav-feed" class="nav-btn w-full flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition text-emerald-400 bg-slate-800/80 shadow-sm">
+                       <i class="fa-solid fa-house text-lg w-6"></i>
+                       <span>Home Feed</span>
+                   </button>
+                   <button onclick="switchTab('explore')" id="nav-explore" class="nav-btn w-full flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/50">
+                       <i class="fa-solid fa-compass text-lg w-6"></i>
+                       <span>Explore</span>
+                   </button>
+                   <button onclick="switchTab('messages')" id="nav-messages" class="nav-btn w-full flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 justify-between">
+                       <div class="flex items-center space-x-4">
+                           <i class="fa-regular fa-paper-plane text-lg w-6"></i>
+                           <span>Messages</span>
+                       </div>
+                       <span class="bg-pink-500/20 text-pink-400 text-xs px-2 py-0.5 rounded-full font-bold">3</span>
+                   </button>
+                   <button onclick="switchTab('notifications')" id="nav-notifications" class="nav-btn w-full flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 justify-between">
+                       <div class="flex items-center space-x-4">
+                           <i class="fa-regular fa-heart text-lg w-6"></i>
+                           <span>Notifications</span>
+                       </div>
+                       <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                   </button>
+                   <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/50">
+                       <i class="fa-regular fa-user text-lg w-6"></i>
+                       <span>Profile</span>
+                   </button>
+               </nav>
+               <!-- Action Button -->
+               <button onclick="openCreateModal()" class="w-full py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-emerald-500 to-pink-500 text-white shadow-lg shadow-emerald-500/10 hover:opacity-95 transition flex items-center justify-center space-x-2">
+                   <i class="fa-solid fa-plus"></i>
+                   <span>Create Post</span>
+               </button>
+           </div>
+           <!-- User Brief / Profile Switcher -->
+           <div class="pt-4 border-t border-slate-800">
+               <div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition cursor-pointer" onclick="switchTab('profile')">
+                   <div class="flex items-center space-x-3">
+                       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Avatar" class="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-500/50">
+                       <div>
+                           <h4 class="text-sm font-semibold text-slate-100 leading-tight">Sophia Roy</h4>
+                           <p class="text-xs text-slate-400">@sophiaroy</p>
+                       </div>
+                   </div>
+                   <i class="fa-solid fa-ellipsis-vertical text-slate-400 text-sm px-1"></i>
+               </div>
+           </div>
+       </aside>
+       <!-- Main Content Feed Area -->
+       <main class="flex-1 overflow-y-auto relative pb-20 md:pb-6" id="main-content">
+
+           <!-- SECTION 1: HOME FEED -->
+           <div id="section-feed" class="max-w-2xl mx-auto p-4 space-y-6">
+               <!-- Stories Carousel -->
+               <div class="bg-slate-900/60 rounded-2xl p-4 border border-slate-800 shadow-sm overflow-hidden">
+                   <h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider flex items-center justify-between">
+                       <span>Stories</span>
+                       <span class="text-emerald-400 text-[11px] cursor-pointer hover:underline">Watch All</span>
+                   </h3>
+                   <div class="flex space-x-4 overflow-x-auto pb-1 no-scrollbar" id="stories-container">
+                       <!-- Story Item: Add Story -->
+                       <div class="flex flex-col items-center space-y-1 flex-shrink-0 cursor-pointer" onclick="openCreateModal()">
+                           <div class="relative w-16 h-16 rounded-full border-2 border-dashed border-emerald-400/60 p-0.5 flex items-center justify-center bg-slate-800">
+                               <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="You" class="w-full h-full rounded-full object-cover opacity-60">
+                               <span class="absolute inset-0 flex items-center justify-center text-emerald-400 text-xl font-bold">+</span>
+                           </div>
+                           <span class="text-xs font-medium text-slate-300">Your Story</span>
+                       </div>
+                       <!-- Story 1 -->
+                       <div class="flex flex-col items-center space-y-1 flex-shrink-0 cursor-pointer" onclick="viewStory('Alex Rivers', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop')">
+                           <div class="w-16 h-16 rounded-full p-[2.5px] story-ring">
+                               <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover border-2 border-slate-950">
+                           </div>
+                           <span class="text-xs font-medium text-slate-300">Alex</span>
+                       </div>
+                       <!-- Story 2 -->
+                       <div class="flex flex-col items-center space-y-1 flex-shrink-0 cursor-pointer" onclick="viewStory('Elena Vance', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop')">
+                           <div class="w-16 h-16 rounded-full p-[2.5px] story-ring">
+                               <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover border-2 border-slate-950">
+                           </div>
+                           <span class="text-xs font-medium text-slate-300">Elena</span>
+                       </div>
+                       <!-- Story 3 -->
+                       <div class="flex flex-col items-center space-y-1 flex-shrink-0 cursor-pointer" onclick="viewStory('Liam Cole', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop')">
+                           <div class="w-16 h-16 rounded-full p-[2.5px] story-ring">
+                               <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover border-2 border-slate-950">
+                           </div>
+                           <span class="text-xs font-medium text-slate-300">Liam</span>
+                       </div>
+                       <!-- Story 4 -->
+                       <div class="flex flex-col items-center space-y-1 flex-shrink-0 cursor-pointer" onclick="viewStory('Maya Patel', 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop')">
+                           <div class="w-16 h-16 rounded-full p-[2.5px] story-ring">
+                               <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover border-2 border-slate-950">
+                           </div>
+                           <span class="text-xs font-medium text-slate-300">Maya</span>
+                       </div>
+                   </div>
+               </div>
+               <!-- Posts List -->
+               <div class="space-y-6" id="posts-container">
+
+                   <!-- Post 1 -->
+                   <article class="bg-slate-900/80 rounded-2xl border border-slate-800/80 overflow-hidden shadow-md transition hover:border-slate-700/80">
+                       <!-- Post Header -->
+                       <div class="flex items-center justify-between p-4 border-b border-slate-800/60">
+                           <div class="flex items-center space-x-3">
+                               <div class="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-emerald-400 to-pink-500">
+                                   <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover border border-slate-900">
+                               </div>
+                               <div>
+                                   <h4 class="text-sm font-semibold text-slate-100">Alex Rivers <span class="text-xs text-emerald-400 font-normal ml-1">• Follow</span></h4>
+                                   <p class="text-xs text-slate-400">Tokyo, Japan • 2 hours ago</p>
+                               </div>
+                           </div>
+                           <button class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-ellipsis"></i></button>
+                       </div>
+                       <!-- Post Image -->
+                       <div class="relative bg-slate-950 aspect-video md:aspect-square overflow-hidden group">
+                           <img src="https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800&fit=crop" alt="Post" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                           <div class="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                       </div>
+                       <!-- Post Action Bar -->
+                       <div class="p-4 space-y-3">
+                           <div class="flex items-center justify-between">
+                               <div class="flex items-center space-x-4 text-xl">
+                                   <button onclick="toggleLike(this)" class="text-slate-300 hover:text-pink-500 transition">
+                                       <i class="fa-regular fa-heart"></i>
+                                   </button>
+                                   <button onclick="toggleComments('comment-box-1')" class="text-slate-300 hover:text-emerald-400 transition">
+                                       <i class="fa-regular fa-comment"></i>
+                                   </button>
+                                   <button onclick="openShareModal()" class="text-slate-300 hover:text-emerald-400 transition">
+                                       <i class="fa-regular fa-paper-plane"></i>
+                                   </button>
+                               </div>
+                               <button onclick="toggleBookmark(this)" class="text-slate-300 hover:text-pink-400 transition text-lg">
+                                   <i class="fa-regular fa-bookmark"></i>
+                               </button>
+                           </div>
+                           <!-- Likes count -->
+                           <p class="text-xs font-semibold text-slate-200">Liked by <span class="text-emerald-400">@sophiaroy</span> and <span class="text-slate-100">1,248 others</span></p>
+                           <!-- Caption -->
+                           <p class="text-sm text-slate-300 leading-relaxed">
+                               <span class="font-semibold text-slate-100 mr-1">Alex Rivers</span>
+                               Tokyo nights hit differently when you get lost in neon alleys! ✨ Hope everyone is having an inspiring week! #Unikgram #Tokyo #TravelDiaries
+                           </p>
+                           <p class="text-xs text-slate-500 cursor-pointer hover:text-slate-400" onclick="toggleComments('comment-box-1')">View all 84 comments</p>
+                           <!-- Comment Input -->
+                           <div id="comment-box-1" class="pt-2 flex items-center space-x-2 border-t border-slate-800/60">
+                               <input type="text" placeholder="Add a comment..." class="flex-1 bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none">
+                               <button class="text-xs font-bold text-pink-400 hover:text-pink-300">Post</button>
+                           </div>
+                       </div>
+                   </article>
+                   <!-- Post 2 -->
+                   <article class="bg-slate-900/80 rounded-2xl border border-slate-800/80 overflow-hidden shadow-md transition hover:border-slate-700/80">
+                       <div class="flex items-center justify-between p-4 border-b border-slate-800/60">
+                           <div class="flex items-center space-x-3">
+                               <div class="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-emerald-400 to-pink-500">
+                                   <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover border border-slate-900">
+                               </div>
+                               <div>
+                                   <h4 class="text-sm font-semibold text-slate-100">Elena Vance</h4>
+                                   <p class="text-xs text-slate-400">Design Studio • 5 hours ago</p>
+                               </div>
+                           </div>
+                           <button class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-ellipsis"></i></button>
+                       </div>
+                       <div class="relative bg-slate-950 aspect-video md:aspect-square overflow-hidden group">
+                           <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&fit=crop" alt="Post" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                       </div>
+                       <div class="p-4 space-y-3">
+                           <div class="flex items-center justify-between">
+                               <div class="flex items-center space-x-4 text-xl">
+                                   <button onclick="toggleLike(this)" class="text-pink-500 transition">
+                                       <i class="fa-solid fa-heart"></i>
+                                   </button>
+                                   <button onclick="toggleComments('comment-box-2')" class="text-slate-300 hover:text-emerald-400 transition">
+                                       <i class="fa-regular fa-comment"></i>
+                                   </button>
+                                   <button onclick="openShareModal()" class="text-slate-300 hover:text-emerald-400 transition">
+                                       <i class="fa-regular fa-paper-plane"></i>
+                                   </button>
+                               </div>
+                               <button onclick="toggleBookmark(this)" class="text-slate-300 hover:text-pink-400 transition text-lg">
+                                   <i class="fa-regular fa-bookmark"></i>
+                               </button>
+                           </div>
+                           <p class="text-xs font-semibold text-slate-200">Liked by <span class="text-pink-400">@liam_c</span> and <span class="text-slate-100">3,892 others</span></p>
+                           <p class="text-sm text-slate-300 leading-relaxed">
+                               <span class="font-semibold text-slate-100 mr-1">Elena Vance</span>
+                               Exploring abstract 3D visual concepts on Unikgram today! Loving this green & neon vibe 🚀🎨
+                           </p>
+                           <div id="comment-box-2" class="pt-2 flex items-center space-x-2 border-t border-slate-800/60">
+                               <input type="text" placeholder="Add a comment..." class="flex-1 bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none">
+                               <button class="text-xs font-bold text-pink-400 hover:text-pink-300">Post</button>
+                           </div>
+                       </div>
+                   </article>
+               </div>
+           </div>
+           <!-- SECTION 2: MESSAGES / CHAT -->
+           <div id="section-messages" class="hidden h-full flex flex-col md:flex-row bg-slate-950">
+               <!-- Chat List -->
+               <div class="w-full md:w-80 border-r border-slate-800 flex flex-col h-full bg-slate-900/40">
+                   <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                       <h2 class="text-lg font-bold text-slate-100">Messages</h2>
+                       <button class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-emerald-400 hover:bg-slate-700">
+                           <i class="fa-solid fa-pen-to-square"></i>
+                       </button>
+                   </div>
+                   <!-- Search inside chat -->
+                   <div class="p-3">
+                       <div class="relative">
+                           <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+                           <input type="text" placeholder="Search conversations..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                       </div>
+                   </div>
+                   <!-- Direct Conversations List -->
+                   <div class="flex-1 overflow-y-auto space-y-1 p-2">
+                       <div onclick="selectChat('Alex Rivers', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop')" class="flex items-center space-x-3 p-3 rounded-xl bg-slate-800/60 border-l-2 border-emerald-400 cursor-pointer">
+                           <div class="relative w-11 h-11">
+                               <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover">
+                               <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-950"></span>
+                           </div>
+                           <div class="flex-1 min-w-0">
+                               <div class="flex justify-between items-baseline mb-0.5">
+                                   <h4 class="text-sm font-semibold text-slate-100 truncate">Alex Rivers</h4>
+                                   <span class="text-[10px] text-emerald-400">12:45 PM</span>
+                               </div>
+                               <p class="text-xs text-slate-300 truncate font-medium">Hey, did you check out the new Unikgram logo?</p>
+                           </div>
+                       </div>
+                       <div onclick="selectChat('Elena Vance', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop')" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-900/80 cursor-pointer">
+                           <div class="relative w-11 h-11">
+                               <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop" class="w-full h-full rounded-full object-cover">
+                               <span class="absolute bottom-0 right-0 w-3 h-3 bg-slate-500 rounded-full border-2 border-slate-950"></span>
+                           </div>
+                           <div class="flex-1 min-w-0">
+                               <div class="flex justify-between items-baseline mb-0.5">
+                                   <h4 class="text-sm font-semibold text-slate-200 truncate">Elena Vance</h4>
+                                   <span class="text-[10px] text-slate-500">Yesterday</span>
+                               </div>
+                               <p class="text-xs text-slate-400 truncate">Loved the post photo!</p>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+               <!-- Chat Window -->
+               <div class="flex-1 flex flex-col h-[calc(100vh-8rem)] md:h-full bg-slate-950">
+                   <!-- Chat Header -->
+                   <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+                       <div class="flex items-center space-x-3">
+                           <img id="chat-active-img" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" class="w-10 h-10 rounded-full object-cover">
+                           <div>
+                               <h3 id="chat-active-name" class="text-sm font-bold text-slate-100">Alex Rivers</h3>
+                               <p class="text-[11px] text-emerald-400">Online</p>
+                           </div>
+                       </div>
+                       <div class="flex items-center space-x-3 text-slate-400">
+                           <button class="hover:text-emerald-400"><i class="fa-solid fa-phone"></i></button>
+                           <button class="hover:text-emerald-400"><i class="fa-solid fa-video"></i></button>
+                           <button class="hover:text-slate-200"><i class="fa-solid fa-circle-info"></i></button>
+                       </div>
+                   </div>
+                   <!-- Messages Feed -->
+                   <div id="message-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                       <div class="flex justify-start">
+                           <div class="max-w-xs bg-slate-900 border border-slate-800 rounded-2xl rounded-bl-none px-4 py-2.5 text-xs text-slate-200 shadow">
+                               Hey Sophia! How is the new design coming along?
+                           </div>
+                       </div>
+                       <div class="flex justify-end">
+                           <div class="max-w-xs bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl rounded-br-none px-4 py-2.5 text-xs shadow">
+                               Hey Alex! It looks clean! We kept green & pink accents and a smooth UI.
+                           </div>
+                       </div>
+                       <div class="flex justify-start">
+                           <div class="max-w-xs bg-slate-900 border border-slate-800 rounded-2xl rounded-bl-none px-4 py-2.5 text-xs text-slate-200 shadow">
+                               Perfect, that completely prevents any confusion with other apps!
+                           </div>
+                       </div>
+                   </div>
+                   <!-- Chat Input -->
+                   <div class="p-3 border-t border-slate-800 bg-slate-900/50">
+                       <form onsubmit="sendMessage(event)" class="flex items-center space-x-2">
+                           <button type="button" class="text-slate-400 hover:text-emerald-400 p-2"><i class="fa-regular fa-image text-lg"></i></button>
+                           <input id="chat-input" type="text" placeholder="Message..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                           <button type="submit" class="bg-gradient-to-r from-emerald-500 to-pink-500 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:opacity-90">Send</button>
+                       </form>
+                   </div>
+               </div>
+           </div>
+           <!-- SECTION 3: EXPLORE -->
+           <div id="section-explore" class="hidden max-w-4xl mx-auto p-4 space-y-4">
+               <!-- Search Box -->
+               <div class="relative max-w-md mx-auto">
+                   <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-sm text-slate-400"></i>
+                   <input type="text" placeholder="Search creators, hashtags, posts..." class="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-11 pr-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-pink-500">
+               </div>
+               <!-- Trending Tags -->
+               <div class="flex space-x-2 overflow-x-auto pb-2 text-xs">
+                   <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20 cursor-pointer">#UnikgramOriginal</span>
+                   <span class="px-3 py-1.5 rounded-xl bg-slate-900 text-slate-300 border border-slate-800 cursor-pointer">#Photography</span>
+                   <span class="px-3 py-1.5 rounded-xl bg-slate-900 text-slate-300 border border-slate-800 cursor-pointer">#UIUXDesign</span>
+                   <span class="px-3 py-1.5 rounded-xl bg-slate-900 text-slate-300 border border-slate-800 cursor-pointer">#TechInnovations</span>
+               </div>
+               <!-- Explore Grid -->
+               <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                   <div class="aspect-square bg-slate-900 rounded-xl overflow-hidden relative group cursor-pointer">
+                       <img src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=500&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                       <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center space-x-4 text-white font-bold text-xs">
+                           <span><i class="fa-solid fa-heart text-pink-500"></i> 1.4k</span>
+                           <span><i class="fa-solid fa-comment text-emerald-400"></i> 92</span>
+                       </div>
+                   </div>
+                   <div class="aspect-square bg-slate-900 rounded-xl overflow-hidden relative group cursor-pointer">
+                       <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                       <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center space-x-4 text-white font-bold text-xs">
+                           <span><i class="fa-solid fa-heart text-pink-500"></i> 2.1k</span>
+                           <span><i class="fa-solid fa-comment text-emerald-400"></i> 110</span>
+                       </div>
+                   </div>
+                   <div class="aspect-square bg-slate-900 rounded-xl overflow-hidden relative group cursor-pointer">
+                       <img src="https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=500&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                       <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center space-x-4 text-white font-bold text-xs">
+                           <span><i class="fa-solid fa-heart text-pink-500"></i> 890</span>
+                           <span><i class="fa-solid fa-comment text-emerald-400"></i> 43</span>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           <!-- SECTION 4: NOTIFICATIONS -->
+           <div id="section-notifications" class="hidden max-w-2xl mx-auto p-4 space-y-4">
+               <h2 class="text-lg font-bold text-slate-100 mb-2">Notifications</h2>
+               <div class="space-y-2">
+                   <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                       <div class="flex items-center space-x-3">
+                           <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop" class="w-10 h-10 rounded-full object-cover">
+                           <p class="text-xs text-slate-200"><span class="font-bold">Alex Rivers</span> liked your post. <span class="text-slate-500 text-[10px] ml-1">10m ago</span></p>
+                       </div>
+                       <span class="text-pink-500 text-xs"><i class="fa-solid fa-heart"></i></span>
+                   </div>
+                   <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                       <div class="flex items-center space-x-3">
+                           <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop" class="w-10 h-10 rounded-full object-cover">
+                           <p class="text-xs text-slate-200"><span class="font-bold">Elena Vance</span> started following you. <span class="text-slate-500 text-[10px] ml-1">1h ago</span></p>
+                       </div>
+                       <button class="px-3 py-1 bg-emerald-500 text-white rounded-lg text-xs font-semibold">Follow Back</button>
+                   </div>
+               </div>
+           </div>
+           <!-- SECTION 5: PROFILE MANAGEMENT -->
+           <div id="section-profile" class="hidden max-w-3xl mx-auto p-4 space-y-6">
+               <!-- Profile Header -->
+               <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
+                   <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full p-[3px] bg-gradient-to-tr from-emerald-400 via-pink-500 to-emerald-300">
+                       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=faces" class="w-full h-full rounded-full object-cover border-2 border-slate-950">
+                   </div>
+                   <div class="flex-1 text-center sm:text-left space-y-3">
+                       <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                           <h2 class="text-xl font-bold text-slate-100">Sophia Roy</h2>
+                           <button class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-xl border border-slate-700 transition">Edit Profile</button>
+                       </div>
+                       <!-- Stats -->
+                       <div class="flex justify-center sm:justify-start space-x-6 text-xs">
+                           <div><span class="font-bold text-slate-100">42</span> <span class="text-slate-400">posts</span></div>
+                           <div><span class="font-bold text-slate-100">12.5k</span> <span class="text-slate-400">followers</span></div>
+                           <div><span class="font-bold text-slate-100">418</span> <span class="text-slate-400">following</span></div>
+                       </div>
+                       <!-- Bio -->
+                       <div class="text-xs text-slate-300 leading-relaxed">
+                           <p class="font-semibold text-slate-100">UI/UX Creator & Visual Artist 🌿✨</p>
+                           <p>Building creative concepts for Unikgram.</p>
+                           <a href="#" class="text-emerald-400 hover:underline">unikgram.app/sophiaroy</a>
+                       </div>
+                   </div>
+               </div>
+               <!-- User Posts Grid -->
+               <div>
+                   <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b border-slate-800 pb-2">Posts</h3>
+                   <div class="grid grid-cols-3 gap-2">
+                       <div class="aspect-square bg-slate-900 rounded-lg overflow-hidden">
+                           <img src="https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=400&fit=crop" class="w-full h-full object-cover">
+                       </div>
+                       <div class="aspect-square bg-slate-900 rounded-lg overflow-hidden">
+                           <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&fit=crop" class="w-full h-full object-cover">
+                       </div>
+                       <div class="aspect-square bg-slate-900 rounded-lg overflow-hidden">
+                           <img src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&fit=crop" class="w-full h-full object-cover">
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </main>
+   </div>
+   <!-- Mobile Bottom Navigation Bar -->
+   <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 z-30 flex justify-around py-2.5">
+       <button onclick="switchTab('feed')" id="mob-feed" class="text-emerald-400 text-lg flex flex-col items-center">
+           <i class="fa-solid fa-house"></i>
+       </button>
+       <button onclick="switchTab('explore')" id="mob-explore" class="text-slate-400 text-lg flex flex-col items-center">
+           <i class="fa-solid fa-compass"></i>
+       </button>
+       <button onclick="openCreateModal()" class="text-white text-lg w-10 h-10 rounded-full bg-gradient-to-r from-emerald-500 to-pink-500 flex items-center justify-center shadow-lg -mt-4">
+           <i class="fa-solid fa-plus"></i>
+       </button>
+       <button onclick="switchTab('notifications')" id="mob-notifications" class="text-slate-400 text-lg flex flex-col items-center">
+           <i class="fa-regular fa-heart"></i>
+       </button>
+       <button onclick="switchTab('profile')" id="mob-profile" class="text-slate-400 text-lg flex flex-col items-center">
+           <i class="fa-regular fa-user"></i>
+       </button>
+   </nav>
+   <!-- Modal: Create Post -->
+   <div id="create-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+       <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-5 space-y-4 shadow-2xl">
+           <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+               <h3 class="font-bold text-slate-100">Create New Post</h3>
+               <button onclick="closeCreateModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+           </div>
+           <textarea placeholder="What's on your mind? #Unikgram" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 h-28 resize-none"></textarea>
+           <div class="border-2 border-dashed border-slate-800 hover:border-emerald-500/50 rounded-xl p-6 text-center cursor-pointer transition">
+               <i class="fa-solid fa-cloud-arrow-up text-2xl text-emerald-400 mb-2"></i>
+               <p class="text-xs text-slate-400">Drag & drop photos or <span class="text-emerald-400 underline">browse</span></p>
+           </div>
+           <button onclick="closeCreateModal()" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-pink-500 text-white rounded-xl text-xs font-bold hover:opacity-95">Publish Post</button>
+       </div>
+   </div>
+   <!-- Script Logic -->
+   <script>
+       function switchTab(tab) {
+           // Hide all sections
+           ['feed', 'messages', 'explore', 'notifications', 'profile'].forEach(s => {
+               document.getElementById('section-' + s).classList.add('hidden');
+           });
+           // Show active section
+           document.getElementById('section-' + tab).classList.remove('hidden');
+           // Desktop nav highlight
+           document.querySelectorAll('.nav-btn').forEach(btn => {
+               btn.classList.remove('text-emerald-400', 'bg-slate-800/80');
+               btn.classList.add('text-slate-400');
+           });
+           const activeNav = document.getElementById('nav-' + tab);
+           if (activeNav) {
+               activeNav.classList.remove('text-slate-400');
+               activeNav.classList.add('text-emerald-400', 'bg-slate-800/80');
+           }
+           // Mobile nav highlight
+           ['feed', 'explore', 'notifications', 'profile'].forEach(m => {
+               const mobBtn = document.getElementById('mob-' + m);
+               if (mobBtn) mobBtn.classList.replace('text-emerald-400', 'text-slate-400');
+           });
+           const activeMob = document.getElementById('mob-' + tab);
+           if (activeMob) activeMob.classList.replace('text-slate-400', 'text-emerald-400');
+       }
+       function toggleLike(btn) {
+           const icon = btn.querySelector('i');
+           if (icon.classList.contains('fa-regular')) {
+               icon.classList.remove('fa-regular');
+               icon.classList.add('fa-solid');
+               btn.classList.add('text-pink-500');
+           } else {
+               icon.classList.remove('fa-solid');
+               icon.classList.add('fa-regular');
+               btn.classList.remove('text-pink-500');
+           }
+       }
+       function toggleBookmark(btn) {
+           const icon = btn.querySelector('i');
+           if (icon.classList.contains('fa-regular')) {
+               icon.classList.remove('fa-regular');
+               icon.classList.add('fa-solid');
+               btn.classList.add('text-emerald-400');
+           } else {
+               icon.classList.remove('fa-solid');
+               icon.classList.add('fa-regular');
+               btn.classList.remove('text-emerald-400');
+           }
+       }
+       function toggleComments(id) {
+           const box = document.getElementById(id);
+           if (box) {
+               const input = box.querySelector('input');
+               if (input) input.focus();
+           }
+       }
+       function selectChat(name, img) {
+           document.getElementById('chat-active-name').innerText = name;
+           document.getElementById('chat-active-img').src = img;
+       }
+       function sendMessage(e) {
+           e.preventDefault();
+           const input = document.getElementById('chat-input');
+           const val = input.value.trim();
+           if (!val) return;
+           const list = document.getElementById('message-list');
+           const msgDiv = document.createElement('div');
+           msgDiv.className = 'flex justify-end';
+           msgDiv.innerHTML = `
+               <div class="max-w-xs bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl rounded-br-none px-4 py-2.5 text-xs shadow">
+                   ${val}
+               </div>
+           `;
+           list.appendChild(msgDiv);
+           input.value = '';
+           list.scrollTop = list.scrollHeight;
+       }
+       function openCreateModal() {
+           document.getElementById('create-modal').classList.remove('hidden');
+       }
+       function closeCreateModal() {
+           document.getElementById('create-modal').classList.add('hidden');
+       }
+       function viewStory(name, img) {
+           alert(`Viewing story by ${name}`);
+       }
+       function openShareModal() {
+           alert("Share feature triggered! Copy link to clipboard.");
+       }
+   </script>
+ </body>
+ </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
